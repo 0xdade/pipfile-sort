@@ -1,0 +1,8 @@
+id: pipfile-sort
+name: pipfile-sort
+entry: pipfile-sort
+language: python
+language_version: python3
+files: Pipfile
+exclude: Pipfile.lock
+types: toml

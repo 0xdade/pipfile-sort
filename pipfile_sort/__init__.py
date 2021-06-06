@@ -1,54 +1,73 @@
-from click import command
-from click import option
-from click import version_option
+import argparse
+import os
+
 from plette import Pipfile
 from plette.pipfiles import PackageCollection
-import sys
 
-APP_VERSION = '0.1.0'
-PIPFILE_FILENAME = './Pipfile'
-PIPFILE_ENCODING = 'utf-8'
-
-
-@command()
-@version_option(version=APP_VERSION)
-@option('--exit-code', is_flag=True, help=
-    'change to behavior of exit code. default behavior of return value, 0 is no differences, 1 is error exit. '
-    'return 2 when add this option. 2 is exists differences.')
-def main(exit_code):
-    # Load current data.
-    with open(PIPFILE_FILENAME, encoding=PIPFILE_ENCODING) as f:
-        pipfile = Pipfile.load(f)
-
-    # Sort "dev-packages" mapping.
-    sorted_dev_packages, all_changed = __sort_collection(pipfile.dev_packages)
-
-    # Sort "packages" mapping.
-    sorted_packages, changed = __sort_collection(pipfile.packages)
-    if changed:
-        all_changed = True
-
-    # Replace with sorted lists
-    pipfile.dev_packages = sorted_dev_packages
-    pipfile.packages = sorted_packages
-
-    # Store sorted data.
-    with open(PIPFILE_FILENAME, 'w', encoding=PIPFILE_ENCODING) as f:
-        Pipfile.dump(pipfile, f)
-
-    # When --exit-code option is valid and package collection has been changed, exit with 2.
-    if exit_code and all_changed:
-        sys.exit(2)
+VERSION = "0.1.0"
+DESC = "Automatically alphabetize Pipfile dependencies"
+PIPFILE_ENCODING = "utf-8"
+CHANGE_CODE = 2
 
 
-def __sort_collection(org_collection):
-    org_packages = [p for p in org_collection]
-    sorted_packages = sorted(org_packages)
+def _parse_args():
+    parser = argparse.ArgumentParser(description=DESC)
+    parser.add_argument(
+        "--exit-code",
+        action="store_true",
+        default=False,
+        help="Return exit code 2 if changes were made",
+    )
+    parser.add_argument("--version", action="version", version="%(prog)s " + VERSION)
+    parser.add_argument(
+        "--files",
+        metavar="FILE",
+        type=str,
+        default=["./Pipfile"],
+        nargs="+",
+        help="Pipfile(s) to sort",
+    )
+    return parser.parse_args()
+
+
+def _sort_collection(collection: PackageCollection):
+    packages = [p for p in collection]
+    sorted_packages = sorted(packages)
 
     return (
-        PackageCollection({
-            p: org_collection[p]._data for p in sorted_packages
-        }),
-        org_packages != sorted_packages,
+        PackageCollection({p: collection[p]._data for p in sorted_packages}),
+        packages != sorted_packages,
     )
 
+
+def _sort_pipfile(pipfile_name: str) -> bool:
+    with open(pipfile_name, encoding=PIPFILE_ENCODING) as f:
+        pipfile = Pipfile.load(f)
+
+    sorted_dev_packages, dev_changed = _sort_collection(pipfile.dev_packages)
+    sorted_packages, changed = _sort_collection(pipfile.packages)
+
+    if dev_changed or changed:
+        pipfile.dev_packages = sorted_dev_packages
+        pipfile.packages = sorted_packages
+
+        with open(pipfile_name, "w", encoding=PIPFILE_ENCODING) as f:
+            Pipfile.dump(pipfile, f)
+
+    return changed or dev_changed
+
+
+def main():
+    args = _parse_args()
+    changes = []
+    for pfile in args.files:
+        if not os.path.isfile(pfile):
+            pass
+        changes.append(_sort_pipfile(pfile))
+
+    if args.exit_code and any(changes):
+        raise SystemExit(CHANGE_CODE)
+
+
+if __name__ == "__main__":
+    main()
