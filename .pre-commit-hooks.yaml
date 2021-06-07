@@ -1,8 +1,10 @@
-id: pipfile-sort
-name: pipfile-sort
-entry: pipfile-sort
-language: python
-language_version: python3
-files: Pipfile
-exclude: .lock$
-types: [toml]
+- id: pipfile-sort
+  name: pipfile-sort
+  description: "Alphabetize Pipfile packages"
+  entry: pipfile-sort --exit-code --files
+  language: python
+  language_version: python3
+  files: Pipfile
+  exclude: .lock$
+  types: [toml]
+  require_serial: true
