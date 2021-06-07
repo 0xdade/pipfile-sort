@@ -7,7 +7,6 @@ from plette.pipfiles import PackageCollection
 VERSION = "0.1.0"
 DESC = "Automatically alphabetize Pipfile dependencies"
 PIPFILE_ENCODING = "utf-8"
-CHANGE_CODE = 2
 
 
 def _parse_args():
@@ -16,7 +15,7 @@ def _parse_args():
         "--exit-code",
         action="store_true",
         default=False,
-        help="Return exit code 2 if changes were made",
+        help="Exit code reflects how many files were changed",
     )
     parser.add_argument("--version", action="version", version="%(prog)s " + VERSION)
     parser.add_argument(
@@ -65,8 +64,10 @@ def main():
             pass
         changes.append(_sort_pipfile(pfile))
 
-    if args.exit_code and any(changes):
-        raise SystemExit(CHANGE_CODE)
+    if any(changes):
+        print(f"{sum(changes)} file(s) changed")
+        if args.exit_code:
+            raise SystemExit(sum(changes))
 
 
 if __name__ == "__main__":
