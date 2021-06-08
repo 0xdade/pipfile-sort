@@ -1,7 +1,9 @@
 - id: pipfile-sort
   name: pipfile-sort
   description: "Alphabetize Pipfile packages"
-  entry: pipfile-sort --exit-code --files
+  entry: pipfile-sort
+  args:
+    - --files
   language: python
   language_version: python3
   files: Pipfile
