@@ -25,6 +25,6 @@ repos:
     - id: black
       language_version: python3.8
   - repo: https://github.com/0xdade/pipfile-sort
-    rev: v0.2.0
+    rev: a5eb0727d443d11224a0d21d57d0f0e43e36f19c
     hooks:
       - id: pipfile-sort
