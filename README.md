@@ -30,3 +30,12 @@ cd /path/to/pipfile/dir
 # Rewrite Pipfile as the package lists are sorted.
 pipfile-sort
 ```
+
+## Pre-commit hook
+
+```yaml
+  - repo: https://github.com/0xdade/pipfile-sort
+    rev: v0.2.1
+    hooks:
+      - id: pipfile-sort
+```

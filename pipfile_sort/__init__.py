@@ -4,7 +4,7 @@ import os
 from plette import Pipfile
 from plette.pipfiles import PackageCollection
 
-VERSION = "0.1.0"
+VERSION = "0.2.1"
 DESC = "Automatically alphabetize Pipfile dependencies"
 PIPFILE_ENCODING = "utf-8"
 
